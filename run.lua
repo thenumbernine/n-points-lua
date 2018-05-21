@@ -2,16 +2,14 @@
 require 'ext'
 require 'vec'
 local ffi = require 'ffi'
-local ImGuiApp = require 'imguiapp'
 local gl = require 'gl'
 local ig = require 'ffi.imgui'
 local bit = bit32 or require 'bit'
+local ImGuiApp = require 'imguiapp'
 
 local View = require 'glapp.view'
 local Orbit = require 'glapp.orbit'
-
 local App = class(Orbit(View.apply(ImGuiApp)))
-
 App.title = 'n points on a sphere'
 App.viewDist = 2
 
@@ -27,7 +25,6 @@ end
 
 function App:init()
 	App.super.init(self)
-
 	reset()
 end
 
