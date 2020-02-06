@@ -1,16 +1,12 @@
 #!/usr/bin/env luajit
 require 'ext'
-require 'vec'
 local ffi = require 'ffi'
-local ImGuiApp = require 'imguiapp'
 local gl = require 'gl'
 local ig = require 'ffi.imgui'
 local bit = bit32 or require 'bit'
+local vec3d = require 'vec-ffi.vec3d'
 
-local View = require 'glapp.view'
-local Orbit = require 'glapp.orbit'
-
-local App = class(Orbit(View.apply(ImGuiApp)))
+local App = class(require 'glapp.orbit'(require 'imguiapp'))
 
 App.title = 'n points on a sphere'
 App.viewDist = 2
@@ -22,13 +18,13 @@ function reset()
 	pts = range(numPoints[0]):map(function(i)
 		if i == 1 then 
 			return {
-				pos = vec3(1,0,0),
-				vel = vec3(),
+				pos = vec3d(1,0,0),
+				vel = vec3d(),
 			}
 		end
 		return {
-			pos = (vec3(math.random(), math.random(), math.random())*.2-vec3(1,1,1)):normalize(),
-			vel = vec3(),
+			pos = (vec3d(math.random(), math.random(), math.random())*.2-vec3d(1,1,1)):normalize(),
+			vel = vec3d(),
 		}
 	end)
 end
