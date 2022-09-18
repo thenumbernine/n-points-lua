@@ -1,21 +1,20 @@
 #!/usr/bin/env luajit
 require 'ext'
-local ffi = require 'ffi'
 local gl = require 'gl'
-local ig = require 'ffi.imgui'
+local ig = require 'imgui'
 local bit = bit32 or require 'bit'
 local vec3d = require 'vec-ffi.vec3d'
 
-local App = class(require 'glapp.orbit'(require 'imguiapp'))
+local App = require 'imguiapp.withorbit'()
 
 App.title = 'n points on a sphere'
 App.viewDist = 2
 
-local numPoints = ffi.new('int[1]', 4)
-local dt = ffi.new('float[1]', .001)
+numPoints = 4
+dt = .001
 
 function reset()
-	pts = range(numPoints[0]):map(function(i)
+	pts = range(numPoints):map(function(i)
 		if i == 1 then 
 			return {
 				pos = vec3d(1,0,0),
@@ -56,13 +55,13 @@ function App:update()
 	for i=1,#pts-1 do
 		for j=i+1,#pts do
 			local d = pts[i].pos - pts[j].pos
-			pts[i].vel = pts[i].vel + d * dt[0]
-			pts[j].vel = pts[j].vel - d * dt[0]
+			pts[i].vel = pts[i].vel + d * dt
+			pts[j].vel = pts[j].vel - d * dt
 		end
 	end
 	-- normalize pos / constrain to sphere
 	for i=1,#pts do
-		pts[i].pos = (pts[i].pos + pts[i].vel * dt[0]):normalize()
+		pts[i].pos = (pts[i].pos + pts[i].vel * dt):normalize()
 	end
 	-- project out pos from vel / enforce tangent vel
 	for i,p in ipairs(pts) do
@@ -76,8 +75,8 @@ end
 
 function App:updateGUI()
 	if ig.igButton'reset' then reset() end
-	if ig.igInputInt('numPoints', numPoints) then reset() end
-	ig.igInputFloat('dt', dt)
+	if ig.luatableInputInt('numPoints', _G, 'numPoints') then reset() end
+	ig.luatableInputFloat('dt', _G, 'dt')
 end
 
 App():run()

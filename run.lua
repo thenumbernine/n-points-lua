@@ -1,20 +1,19 @@
 #!/usr/bin/env luajit
 require 'ext'
-local ffi = require 'ffi'
 local gl = require 'gl'
-local ig = require 'ffi.imgui'
+local ig = require 'imgui'
 local bit = bit32 or require 'bit'
 local vec3d = require 'vec-ffi.vec3d'
 
-local App = class(require 'glapp.orbit'(require 'imguiapp'))
+local App = require 'imguiapp.withorbit'()
 App.title = 'n points on a sphere'
 App.viewDist = 2
 
-local numPoints = ffi.new('int[1]', 4)
-local dt = ffi.new('float[1]', .1)
+numPoints = 4
+dt = .1
 
 function reset()
-	pts = range(numPoints[0]):map(function(i)
+	pts = range(numPoints):map(function(i)
 		if i == 1 then return vec3d(1,0,0) end
 		return (vec3d(math.random(), math.random(), math.random())*.2-vec3d(1,1,1)):normalize()
 	end)
@@ -47,8 +46,8 @@ function App:update()
 		for j=1,#pts do
 			if i ~= j then
 				local d = (pts[i] - pts[j]):normalize()
-				pts[i] = (pts[i] + d * dt[0]):normalize()
-				pts[j] = (pts[j] - d * dt[0]):normalize()
+				pts[i] = (pts[i] + d * dt):normalize()
+				pts[j] = (pts[j] - d * dt):normalize()
 			end
 		end
 	end
@@ -58,8 +57,8 @@ end
 
 function App:updateGUI()
 	if ig.igButton'reset' then reset() end
-	if ig.igInputInt('numPoints', numPoints) then reset() end
-	ig.igInputFloat('dt', dt)
+	if ig.luatableInputInt('numPoints', _G, 'numPoints') then reset() end
+	ig.luatableInputFloat('dt', _G, 'dt')
 end
 
 App():run()
