@@ -61,4 +61,4 @@ function App:updateGUI()
 	ig.luatableInputFloat('dt', _G, 'dt')
 end
 
-App():run()
+return App():run()
