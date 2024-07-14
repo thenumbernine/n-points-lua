@@ -1,5 +1,6 @@
 #!/usr/bin/env luajit
-require 'ext'
+local range = require 'ext.range'
+local table = require 'ext.table'
 local gl = require 'gl'
 local ig = require 'imgui'
 local bit = bit32 or require 'bit'
@@ -17,7 +18,7 @@ local pts, vels
 local function reset()
 	pts = range(numPoints):mapi(function(i)
 		if i == 1 then return vec3d(1,0,0) end
-		return (vec3d(math.random(), math.random(), math.random())*.2-vec3d(1,1,1)):normalize()
+		return (vec3d(math.random(), math.random(), math.random())*.2 - vec3d(1,1,1)):normalize()
 	end)
 	vels = range(numPoints):mapi(function(i)
 		return vec3d()
