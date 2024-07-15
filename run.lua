@@ -1,5 +1,6 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
+local table = require 'ext.table'
 local gl = require 'gl.setup'(... or 'OpenGLES3')
 local ig = require 'imgui'
 local vec3f = require 'vec-ffi.vec3f'
@@ -49,6 +50,30 @@ local function reset()
 		},
 	}
 
+	local indexes = table()
+	for i=0,numPoints-2 do
+		for j=i+1,numPoints-1 do
+			indexes:insert(i)
+			indexes:insert(j)
+		end
+	end
+	indexesBuf = require 'gl.elementarraybuffer'{
+		type = gl.GL_UNSIGNED_INT,
+		data = indexes,
+	}:unbind()
+
+	lineSceneObj = GLSceneObject{
+		program = program,
+		geometry = {
+			mode = gl.GL_LINES,
+			indexes = indexesBuf,
+		},
+		attrs = {
+			vertex = {
+				buffer = vertexBuf,
+			},
+		},
+	}
 end
 
 function App:initGL()
@@ -61,16 +86,17 @@ function App:initGL()
 		vertexCode = [[
 in vec3 vertex;
 uniform mat4 mvProjMat;
+uniform float pointSize;
 void main() {
-	gl_PointSize = 3.;	//doesn't work
-
+	gl_PointSize = pointSize;
 	gl_Position = mvProjMat * vec4(vertex, 1.);
 }
 ]],
 		fragmentCode = [[
+uniform float lum;
 out vec4 fragColor;
 void main() {
-	fragColor = vec4(1., 1., 1., 1.);
+	fragColor = vec4(lum, lum, lum, 1.);
 }
 ]],
 	}:useNone()
@@ -86,23 +112,17 @@ end
 function App:update()
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
---[[ TODO indexed draw buf inter-pts
-	gl.glColor3f(.5, .5, .5)
-	gl.glBegin(gl.GL_LINES)
-	for i=1,#pts-1 do
-		for j=i+1,#pts do
-			gl.glVertex3d(pts[i]:unpack())
-			gl.glVertex3d(pts[j]:unpack())
-		end
-	end
-	gl.glEnd()
---]]
---	gl.glPointSize(3)
+	gl.glLineWidth(1)
+	lineSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
+	lineSceneObj.uniforms.pointSize = 1
+	lineSceneObj.uniforms.lum = .5
+	lineSceneObj:draw()
 
-	-- still doesn't work ... https://gamedev.stackexchange.com/a/126118
+	-- still doesn't affect point size like https://gamedev.stackexchange.com/a/126118 says
 	gl.glLineWidth(3)
-
 	pointSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
+	pointSceneObj.uniforms.pointSize = 3
+	pointSceneObj.uniforms.lum = 1
 	pointSceneObj:draw()
 
 	-- accum vels before normalize = converges without constantly spinning
