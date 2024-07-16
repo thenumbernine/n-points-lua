@@ -23,7 +23,7 @@ local function reset()
 	ptsCPU:resize(numPoints)
 	ptsCPU.v[0] = vec3f(1,0,0)
 	for i=1,numPoints-1 do
-		ptsCPU.v[i] = (vec3f(math.random(), math.random(), math.random())*.2 - vec3f(1,1,1)):normalize()
+		ptsCPU.v[i] = (vec3f(math.random(), math.random(), math.random())*2 - vec3f(1,1,1)):normalize()
 	end
 
 	velsCPU:resize(numPoints)
@@ -57,8 +57,11 @@ local function reset()
 			indexes:insert(j)
 		end
 	end
+	-- TODO not yet working in webgl/gles yet
 	indexesBuf = require 'gl.elementarraybuffer'{
-		type = gl.GL_UNSIGNED_INT,
+		type = gl.GL_UNSIGNED_BYTE,		-- webgl works
+		--type = gl.GL_UNSIGNED_SHORT,	-- webgl gets weird buffer error
+		--type = gl.GL_UNSIGNED_INT,	-- webgl gets weird buffer error
 		data = indexes,
 	}:unbind()
 
@@ -74,6 +77,10 @@ local function reset()
 			},
 		},
 	}
+	-- [[ setting these enables glDrawRangedElements
+	lineSceneObj.geometry.indexStart = 0
+	lineSceneObj.geometry.indexEnd = #ptsCPU-1
+	--]]
 end
 
 function App:initGL()
@@ -118,6 +125,7 @@ function App:update()
 	lineSceneObj.uniforms.lum = .5
 	lineSceneObj:draw()
 
+	-- glPointSize(3) worked fine with deprecated API, but isn't working in the GLSL or as glLineWidth here
 	-- still doesn't affect point size like https://gamedev.stackexchange.com/a/126118 says
 	gl.glLineWidth(3)
 	pointSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
@@ -145,6 +153,7 @@ function App:update()
 		:unbind()
 
 	App.super.update(self)
+require 'gl.report' 'here'
 end
 
 function App:updateGUI()
