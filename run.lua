@@ -19,70 +19,6 @@ dt = .1
 local ptsCPU = vector'vec3f_t'
 local velsCPU = vector'vec3f_t'
 
-local function reset()
-	ptsCPU:resize(numPoints)
-	ptsCPU.v[0] = vec3f(1,0,0)
-	for i=1,numPoints-1 do
-		ptsCPU.v[i] = (vec3f(math.random(), math.random(), math.random())*2 - vec3f(1,1,1)):normalize()
-	end
-
-	velsCPU:resize(numPoints)
-	for i=0,numPoints-1 do
-		velsCPU.v[i] = vec3f()
-	end
-
-	vertexBuf = require 'gl.arraybuffer'{
-		data = ptsCPU.v,
-		size = numPoints * 3 * ffi.sizeof'float',
-		usage = gl.GL_DYNAMIC_DRAW,
-	}:unbind()
-
-	pointSceneObj = GLSceneObject{
-		program = program,
-		geometry = {
-			mode = gl.GL_POINTS,
-			count = numPoints,
-		},
-		attrs = {
-			vertex = {
-				buffer = vertexBuf,
-			},
-		},
-	}
-
-	local indexes = table()
-	for i=0,numPoints-2 do
-		for j=i+1,numPoints-1 do
-			indexes:insert(i)
-			indexes:insert(j)
-		end
-	end
-	-- TODO not yet working in webgl/gles yet
-	indexesBuf = require 'gl.elementarraybuffer'{
-		type = gl.GL_UNSIGNED_BYTE,		-- webgl works
-		--type = gl.GL_UNSIGNED_SHORT,	-- webgl gets weird buffer error
-		--type = gl.GL_UNSIGNED_INT,	-- webgl gets weird buffer error
-		data = indexes,
-	}:unbind()
-
-	lineSceneObj = GLSceneObject{
-		program = program,
-		geometry = {
-			mode = gl.GL_LINES,
-			indexes = indexesBuf,
-		},
-		attrs = {
-			vertex = {
-				buffer = vertexBuf,
-			},
-		},
-	}
-	-- [[ setting these enables glDrawRangedElements
-	lineSceneObj.geometry.indexStart = 0
-	lineSceneObj.geometry.indexEnd = #ptsCPU-1
-	--]]
-end
-
 function App:initGL()
 	App.super.initGL(self)
 
@@ -108,29 +44,92 @@ void main() {
 ]],
 	}:useNone()
 
-	reset()
+	self:reset()
 
 	gl.glEnable(gl.GL_BLEND)
-	gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+	gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE)
 	gl.glDisable(gl.GL_CULL_FACE)
 	gl.glEnable(gl.GL_DEPTH_TEST)
 end
+
+function App:reset()
+	ptsCPU:resize(numPoints)
+	ptsCPU.v[0] = vec3f(1,0,0)
+	for i=1,numPoints-1 do
+		ptsCPU.v[i] = (vec3f(math.random(), math.random(), math.random())*2 - vec3f(1,1,1)):normalize()
+	end
+
+	velsCPU:resize(numPoints)
+	for i=0,numPoints-1 do
+		velsCPU.v[i] = vec3f()
+	end
+
+	vertexBuf = require 'gl.arraybuffer'{
+		data = ptsCPU.v,
+		size = numPoints * 3 * ffi.sizeof'float',
+		count = numPoints,
+		dim = 3,
+		usage = gl.GL_DYNAMIC_DRAW,
+	}:unbind()
+
+	pointSceneObj = GLSceneObject{
+		program = program,
+		uniforms = {
+			pointSize = 3,
+			lum = 1,
+		},
+		vertexes = vertexBuf,
+		geometry = {
+			mode = gl.GL_POINTS,
+		},
+	}
+
+	local indexes = table()
+	for i=0,numPoints-2 do
+		for j=i+1,numPoints-1 do
+			indexes:insert(i)
+			indexes:insert(j)
+		end
+	end
+	-- TODO not yet working in webgl/gles yet
+	indexesBuf = require 'gl.elementarraybuffer'{
+		type = gl.GL_UNSIGNED_BYTE,		-- webgl works
+		--type = gl.GL_UNSIGNED_SHORT,	-- webgl gets weird buffer error
+		--type = gl.GL_UNSIGNED_INT,	-- webgl gets weird buffer error
+		data = indexes,
+		count = #indexes,
+	}:unbind()
+
+	lineSceneObj = GLSceneObject{
+		program = program,
+		uniforms = {
+			pointSize = 1,
+			lum = .5,
+		},
+		vertexes = vertexBuf,
+		geometry = {
+			mode = gl.GL_LINES,
+			indexes = indexesBuf,
+		},
+	}
+	-- [[ setting these enables glDrawRangedElements
+	lineSceneObj.geometry.indexStart = 0
+	lineSceneObj.geometry.indexEnd = #ptsCPU-1
+	--]]
+end
+
 
 function App:update()
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
 	gl.glLineWidth(1)
 	lineSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
-	lineSceneObj.uniforms.pointSize = 1
-	lineSceneObj.uniforms.lum = .5
 	lineSceneObj:draw()
 
 	-- glPointSize(3) worked fine with deprecated API, but isn't working in the GLSL or as glLineWidth here
 	-- still doesn't affect point size like https://gamedev.stackexchange.com/a/126118 says
 	gl.glLineWidth(3)
 	pointSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
-	pointSceneObj.uniforms.pointSize = 3
-	pointSceneObj.uniforms.lum = 1
 	pointSceneObj:draw()
 
 	-- accum vels before normalize = converges without constantly spinning
@@ -157,8 +156,8 @@ require 'gl.report' 'here'
 end
 
 function App:updateGUI()
-	if ig.igButton'reset' then reset() end
-	if ig.luatableInputInt('numPoints', _G, 'numPoints') then reset() end
+	if ig.igButton'reset' then self:reset() end
+	if ig.luatableInputInt('numPoints', _G, 'numPoints') then self:reset() end
 	ig.luatableInputFloat('dt', _G, 'dt')
 end
 
