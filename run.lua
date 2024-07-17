@@ -91,13 +91,9 @@ function App:reset()
 			indexes:insert(j)
 		end
 	end
-	-- TODO not yet working in webgl/gles yet
 	indexesBuf = require 'gl.elementarraybuffer'{
-		type = gl.GL_UNSIGNED_BYTE,		-- webgl works
-		--type = gl.GL_UNSIGNED_SHORT,	-- webgl gets weird buffer error
-		--type = gl.GL_UNSIGNED_INT,	-- webgl gets weird buffer error
+		type = gl.GL_UNSIGNED_SHORT,
 		data = indexes,
-		count = #indexes,
 	}:unbind()
 
 	lineSceneObj = GLSceneObject{
@@ -112,10 +108,6 @@ function App:reset()
 			indexes = indexesBuf,
 		},
 	}
-	-- [[ setting these enables glDrawRangedElements
-	lineSceneObj.geometry.indexStart = 0
-	lineSceneObj.geometry.indexEnd = #ptsCPU-1
-	--]]
 end
 
 
