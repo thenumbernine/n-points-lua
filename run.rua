@@ -23,7 +23,7 @@ App.initGL = [:] do
 	-- do this before the first reset()
 	program = require 'gl.program'{
 		version = 'latest',
-		header = 'precision highp float;',
+		precision = 'best',
 		vertexCode = [[
 in vec3 vertex;
 uniform mat4 mvProjMat;
