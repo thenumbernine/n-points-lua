@@ -9,7 +9,6 @@ local GLSceneObject = require 'gl.sceneobject'
 
 local App = require 'imguiapp.withorbit'()
 App.title = 'n points on a sphere'
-App.viewUseBuiltinMatrixMath = true
 App.viewDist = 2
 
 -- global for ig table access
