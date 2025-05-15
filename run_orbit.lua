@@ -5,7 +5,7 @@ local ig = require 'imgui'
 local bit = bit32 or require 'bit'
 local vec3d = require 'vec-ffi.vec3d'
 
-local App = require 'imguiapp.withorbit'()
+local App = require 'imgui.appwithorbit'()
 
 App.title = 'n points on a sphere'
 App.viewDist = 2

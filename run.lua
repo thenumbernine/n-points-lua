@@ -7,7 +7,7 @@ local vec3f = require 'vec-ffi.vec3f'
 local vector = require 'ffi.cpp.vector-lua'
 local GLSceneObject = require 'gl.sceneobject'
 
-local App = require 'imguiapp.withorbit'()
+local App = require 'imgui.appwithorbit'()
 App.title = 'n points on a sphere'
 App.viewDist = 2
 
