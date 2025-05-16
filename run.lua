@@ -1,7 +1,12 @@
 #!/usr/bin/env luajit
+local cmdline = require 'ext.cmdline'.validate{
+	n = {desc='number of points'},
+	dt = {desc='timestep'},
+	gl = {desc='gl ffi bindings to use'},
+}(...)
 local ffi = require 'ffi'
 local table = require 'ext.table'
-local gl = require 'gl.setup'(... or 'OpenGLES3')
+local gl = require 'gl.setup'(cmdline.gl or 'OpenGLES3')
 local ig = require 'imgui'
 local vec3f = require 'vec-ffi.vec3f'
 local vector = require 'ffi.cpp.vector-lua'
@@ -12,8 +17,8 @@ App.title = 'n points on a sphere'
 App.viewDist = 2
 
 -- global for ig table access
-numPoints = 4
-dt = .1
+numPoints = cmdline.n or 4
+dt = cmdline.dt or .1
 
 local ptsCPU = vector'vec3f_t'
 local velsCPU = vector'vec3f_t'
