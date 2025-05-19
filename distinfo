@@ -1,0 +1,18 @@
+name = "n-points"
+files = {
+	["README.md"] = "n-points/README.md",
+	["demo.gif"] = "n-points/demo.gif",
+	["demo.mp4"] = "n-points/demo.mp4",
+	["n-points-dev-1.rockspec"] = "n-points/n-points-dev-1.rockspec",
+	["run.lua"] = "n-points/run.lua",
+	["run.rua"] = "n-points/run.rua",
+	["run_orbit.lua"] = "n-points/run_orbit.lua",
+}
+deps = {
+	"bit",
+	"ext",
+	"ffi",
+	"gl",
+	"imgui",
+	"vec-ffi",
+}
