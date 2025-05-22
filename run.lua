@@ -6,11 +6,12 @@ local cmdline = require 'ext.cmdline'.validate{
 }(...)
 local ffi = require 'ffi'
 local table = require 'ext.table'
-local gl = require 'gl.setup'(cmdline.gl or 'OpenGLES3')
+local gl = require 'gl.setup'(cmdline.gl)
 local ig = require 'imgui'
 local vec3f = require 'vec-ffi.vec3f'
 local vector = require 'ffi.cpp.vector-lua'
 local GLSceneObject = require 'gl.sceneobject'
+local glreport = require 'gl.report'
 
 local App = require 'imgui.appwithorbit'()
 App.title = 'n points on a sphere'
@@ -118,13 +119,18 @@ end
 function App:update()
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
+	-- in GL APIs that don't support glLineWidth, the function will be there, and it'll set the gl error.
+glreport'here'
 	gl.glLineWidth(1)
+gl.glGetError()	-- clear the line width errors
 	lineSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
 	lineSceneObj:draw()
 
 	-- glPointSize(3) worked fine with deprecated API, but isn't working in the GLSL or as glLineWidth here
 	-- still doesn't affect point size like https://gamedev.stackexchange.com/a/126118 says
+glreport'here'
 	gl.glLineWidth(3)
+gl.glGetError()	-- clear the line width errors
 	pointSceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
 	pointSceneObj:draw()
 
