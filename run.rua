@@ -22,7 +22,7 @@ dt = cmdline.dt or .1
 local ptsCPU = vector'vec3f_t'
 local velsCPU = vector'vec3f_t'
 
-App.initGL = [:] do
+App.initGL = |:| do
 	App.super.initGL(self)
 
 	-- do this before the first reset()
@@ -55,7 +55,7 @@ void main() {
 	gl.glEnable(gl.GL_DEPTH_TEST)
 end
 
-App.reset = [:] do
+App.reset = |:| do
 	ptsCPU:resize(numPoints)
 	ptsCPU.v[0] = vec3f(1,0,0)
 	for i=1,numPoints-1 do
@@ -114,7 +114,7 @@ App.reset = [:] do
 end
 
 
-App.update = [:] do
+App.update = |:| do
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
 	-- in GL APIs that don't support glLineWidth, the function will be there, and it'll set the gl error.
@@ -155,7 +155,7 @@ gl.glGetError()	-- clear the line width errors
 require 'gl.report' 'here'
 end
 
-App.updateGUI = [:] do
+App.updateGUI = |:| do
 	if ig.igButton'reset' then self:reset() end
 	if ig.luatableInputInt('numPoints', _G, 'numPoints') then self:reset() end
 	ig.luatableInputFloat('dt', _G, 'dt')
