@@ -21,8 +21,8 @@ App.viewDist = 2
 numPoints = cmdline.n or 4
 dt = cmdline.dt or .1
 
-local ptsCPU = vector'vec3f_t'
-local velsCPU = vector'vec3f_t'
+local ptsCPU = vector(vec3f)
+local velsCPU = vector(vec3f)
 
 function App:initGL()
 	App.super.initGL(self)
