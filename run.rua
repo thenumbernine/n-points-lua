@@ -7,7 +7,7 @@ local cmdline = require 'ext.cmdline'.validate{
 local gl = require 'gl.setup'(cmdline.gl)
 local ig = require 'imgui'
 local vec3f = require 'vec-ffi.vec3f'
-local vector = require 'ffi.cpp.vector-lua'
+local vector = require 'stl.vector-lua'
 local GLSceneObject = require 'gl.sceneobject'
 
 local App = require 'imgui.appwithorbit'()

@@ -19,5 +19,6 @@ deps = {
 	"ffi",
 	"gl",
 	"imgui",
+	"stl",
 	"vec-ffi",
 }
